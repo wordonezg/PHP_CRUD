@@ -47,7 +47,7 @@
           </div>
 
           <div class="mb-3">
-            <label for="lbl_fecha_nacimiento" class="form-label">Teléfono</label>
+            <label for="lbl_fecha_nacimiento" class="form-label">Fecha Nacimiento</label>
             <input type="date" name="txt_fecha_nacimiento" id="txt_fecha_nacimiento" class="form-control" placeholder="Fecha Nacimiento" aria-describedby="helpId" Required>
             <small id="helpId" class="text-muted">Formato: dd/mm/aaaa</small>
           </div>
@@ -70,7 +70,9 @@
               ?>
             </select>
           </div>
-          <button type="submit" name="btn_enviar" id="btn_enviar" class="btn btn-primary">Enviar</button>
+          <button type="submit" name="btn_enviar" id="btn_enviar" class="btn btn-success">Guardar</button>
+          <button type="submit" name="btn_update" id="btn_update" class="btn btn-primary">Actualizar</button>
+          <button type="submit" name="btn_delete" id="btn_delete" class="btn btn-danger">Eliminar</button>
         </div>
       </form>
       <table class="mt-2 table table-dark table-striped table-inverse table-responsive">
@@ -84,18 +86,17 @@
             <th>Fecha Nacimiento</th>
             <th>Puesto</th>
             <th></th>
-            <th></th>
           </tr>
           </thead>
           <tbody>
           <?php
             include("Conexion.php");
             $db_conexion = new mysqli($db_host,$db_usr,$db_pass,$db_name);
-            $result_query = $db_conexion->query('SELECT codigo, nombres, apellidos, direccion, telefono, fecha_nacimiento, P.puesto FROM Empleados E JOIN Puestos P ON E.id_puesto=P.id_puesto');
+            $result_query = $db_conexion->query('SELECT codigo, nombres, apellidos, direccion, telefono, fecha_nacimiento, P.puesto, E.id_puesto FROM Empleados E JOIN Puestos P ON E.id_puesto=P.id_puesto');
             //echo $result_query;
             $workers = $result_query->fetch_object();
             while($workers != null){
-              echo "<tr>";
+              echo '<tr data-id="'. $workers->codigo .'" data-idPuesto="'. $workers->id_puesto .'">';
               echo "<td>". $workers->codigo ."</td>";
               echo "<td>". $workers->nombres ."</td>";
               echo "<td>". $workers->apellidos ."</td>";
@@ -103,8 +104,7 @@
               echo "<td>". $workers->telefono ."</td>";
               echo "<td>". $workers->fecha_nacimiento ."</td>";
               echo "<td>". $workers->puesto ."</td>";
-              echo '<td><input name="btn_editar" id="btn_editar_'. $workers->codigo .'" class="btn btn-warning" type="button" value="Editar"></td>';
-              echo '<td><input name="btn_eliminar" id="btn_eliminar_'. $workers->codigo .'" class="btn btn-danger" type="button" value="Eliminar"></td>';
+              echo '<td><input name="btn_editar" onclick="editar(this.parentElement.parentElement);" class="btn btn-warning" type="button" value="Editar"></td>';
               echo "</tr>";
               $workers = $result_query->fetch_object();
             }
@@ -134,6 +134,62 @@
         }
         $db_conexion->close();
       }
+      if(isset($_POST["btn_update"])){
+        include("Conexion.php");
+        $db_conexion = new mysqli($db_host,$db_usr,$db_pass,$db_name);
+        $txt_codigo =utf8_decode($_POST["txt_codigo"]);
+        $txt_nombres =utf8_decode($_POST["txt_nombres"]);
+        $txt_apellidos =utf8_decode($_POST["txt_apellidos"]);
+        $txt_direccion =utf8_decode($_POST["txt_direccion"]);
+        $txt_telefono =utf8_decode($_POST["txt_telefono"]);
+        $cb_puesto =utf8_decode($_POST["cb_puesto"]);
+        $txt_fecha_nacimiento =utf8_decode($_POST["txt_fecha_nacimiento"]);
+        $sql = "UPDATE Empleados SET nombres='". $txt_nombres ."',apellidos='". $txt_apellidos ."',direccion='". $txt_direccion ."',telefono='". $txt_telefono ."',fecha_nacimiento='". $txt_fecha_nacimiento ."',id_puesto=". $cb_puesto ." WHERE codigo=". $txt_codigo;
+        
+        if($db_conexion->query($sql)){
+          header("Refresh:0");
+        }else{
+          echo"Error" . $sql ."<br>";
+        }
+        $db_conexion->close();
+      }
+      if(isset($_POST["btn_delete"])){
+        include("Conexion.php");
+        $db_conexion = new mysqli($db_host,$db_usr,$db_pass,$db_name);
+        $txt_codigo =utf8_decode($_POST["txt_codigo"]);
+        $txt_fecha_nacimiento =utf8_decode($_POST["txt_fecha_nacimiento"]);
+        $sql = "DELETE FROM Empleados WHERE codigo=". $txt_codigo;
+        if($db_conexion->query($sql)){
+          header("Refresh:0");
+        }else{
+          echo"Error" . $sql ."<br>";
+        }
+        $db_conexion->close();
+      }
     ?>
   </body>
+  <script>
+    function editar(fila){
+      let id= fila.getAttribute("data-id");
+      let idPuesto= fila.getAttribute("data-idPuesto");
+      let cels = fila.childNodes;
+      let codigo=cels[0].innerHTML;
+      let nombres=cels[1].innerHTML;
+      let apellidos=cels[2].innerHTML;
+      let direccion=cels[3].innerHTML;
+      let telefono=cels[4].innerHTML;
+      let fecha_nacimiento=cels[5].innerHTML;
+
+      document.getElementById("txt_codigo").value=id;
+      document.getElementById("txt_nombres").value=nombres;
+      document.getElementById("txt_apellidos").value=apellidos;
+      document.getElementById("txt_direccion").value=direccion;
+      document.getElementById("txt_telefono").value=telefono;
+      document.getElementById("txt_fecha_nacimiento").value=fecha_nacimiento;
+      document.getElementById("cb_puesto").value=idPuesto;
+
+
+
+    };
+  </script>
 </html>
