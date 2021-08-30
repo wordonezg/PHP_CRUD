@@ -17,7 +17,7 @@
   <body>
     <h1>Empleados</h1>
     <div class="container">
-      <form class="d-flex">
+      <form class="d-flex" action="" method="post">
         <div class="col">
           <div class="mb-3">
             <label for="lbl_codigo" class="form-label">Código</label>
@@ -48,7 +48,7 @@
 
           <div class="mb-3">
             <label for="lbl_fecha_nacimiento" class="form-label">Teléfono</label>
-            <input type="date" name="lbl_fecha_nacimiento" id="lbl_fecha_nacimiento" class="form-control" placeholder="Fecha Nacimiento" aria-describedby="helpId" Required>
+            <input type="date" name="txt_fecha_nacimiento" id="txt_fecha_nacimiento" class="form-control" placeholder="Fecha Nacimiento" aria-describedby="helpId" Required>
             <small id="helpId" class="text-muted">Formato: dd/mm/aaaa</small>
           </div>
           <div class="mb-3">
@@ -70,7 +70,7 @@
               ?>
             </select>
           </div>
-          <button type="submit" class="btn btn-primary">Enviar</button>
+          <button type="submit" name="btn_enviar" id="btn_enviar" class="btn btn-primary">Enviar</button>
         </div>
       </form>
       <table class="mt-2 table table-dark table-striped table-inverse table-responsive">
@@ -88,12 +88,6 @@
           </tr>
           </thead>
           <tbody>
-            <div class="mb-3">
-              <label for="" class="form-label"></label>
-              <input type="text|password|email|number|submit|date|datetime|datetime-local|month|color|range|search|tel|time|url|week"
-                class="form-control" name="" id="" aria-describedby="helpId" placeholder="">
-              <small id="helpId" class="form-text text-muted">Help text</small>
-            </div>
           <?php
             include("Conexion.php");
             $db_conexion = new mysqli($db_host,$db_usr,$db_pass,$db_name);
@@ -121,5 +115,25 @@
       </table>
       
     </div>
+    <?php
+      if(isset($_POST["btn_enviar"])){
+        include("Conexion.php");
+        $db_conexion = new mysqli($db_host,$db_usr,$db_pass,$db_name);
+        $txt_codigo =utf8_decode($_POST["txt_codigo"]);
+        $txt_nombres =utf8_decode($_POST["txt_nombres"]);
+        $txt_apellidos =utf8_decode($_POST["txt_apellidos"]);
+        $txt_direccion =utf8_decode($_POST["txt_direccion"]);
+        $txt_telefono =utf8_decode($_POST["txt_telefono"]);
+        $cb_puesto =utf8_decode($_POST["cb_puesto"]);
+        $txt_fecha_nacimiento =utf8_decode($_POST["txt_fecha_nacimiento"]);
+        $sql = "INSERT INTO Empleados(codigo,nombres,apellidos,direccion,telefono,fecha_nacimiento,id_puesto) VALUES(". $txt_codigo .",'". $txt_nombres ."','". $txt_apellidos ."','". $txt_direccion ."','". $txt_telefono ."','". $txt_fecha_nacimiento ."',". $cb_puesto .")";
+        if($db_conexion->query($sql)){
+          header("Refresh:0");
+        }else{
+          echo"Error" . $sql ."<br>";
+        }
+        $db_conexion->close();
+      }
+    ?>
   </body>
 </html>
